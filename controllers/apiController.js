@@ -1,6 +1,7 @@
 const Post = require('../models/post');
 const Comment = require('../models/comment');
 const {body,param,validationResult} = require('express-validator')
+const Routing = require('../middleware/routing')
 
 exports.getHome = function(req,res,next){
     res.json({key:'test'});
@@ -52,6 +53,8 @@ exports.getSinglePost = [
         .trim()
         .escape(),
 
+    Routing.validId,
+    
     function(req,res,next){
         let errors = validationResult(req);
 
@@ -62,7 +65,7 @@ exports.getSinglePost = [
             Post.findById(req.params.id)
                 .then(post=>{
                     if(!post){
-                        res.status(404).json({error:'Post does not exist'})
+                        res.status(404).json({errors:'Post does not exist'})
                     }
                     else{
                         res.json(post)
@@ -79,6 +82,9 @@ exports.deletePost = [
     param('id').isLength({min:24,max:24}).withMessage('Invalid ID')
         .trim()
         .escape(),
+
+    Routing.validId,
+    
     function(req,res,next){
         let errors = validationResult(req);
 
@@ -110,6 +116,8 @@ exports.getComments = [
     param('id').isLength({min:24,max:24}).withMessage('Invalid ID')
         .trim()
         .escape(),
+    Routing.validId,
+    
     function(req,res,next){
         let errors = validationResult(req);
 
@@ -138,6 +146,8 @@ exports.postComment = [
     param('id').isLength({min:24,max:24}).withMessage('Invalid ID')
         .trim()
         .escape(),
+    Routing.validId,
+    
     function(req,res,next){
         let errors = validationResult(req);
 
@@ -149,7 +159,7 @@ exports.postComment = [
             Post.findById(req.params.id)
                 .then(post=>{
                     if(!post){
-                        res.json({error:'NO POST FOUND'});
+                        res.json({errors:'NO POST FOUND'});
                     }
                     else{
                         let comment = new Comment({
@@ -176,6 +186,8 @@ exports.deleteComment = [
     param('id').isLength({min:24,max:24}).withMessage('Invalid ID')
         .trim()
         .escape(),
+    Routing.validId,
+    
     param('commentId').isLength({min:24,max:24}).withMessage('Invalid Comment ID')
         .trim()
         .escape(),
@@ -189,7 +201,7 @@ exports.deleteComment = [
             Comment.findOneAndDelete({post:req.params.id, _id:req.params.commentId})
                 .then(comment=>{
                     if(!comment){
-                        res.json({error:'NO COMMENT OR POST FOUND'})
+                        res.json({errors:'NO COMMENT OR POST FOUND'})
                     }
                     else{
                         res.json(comment)
