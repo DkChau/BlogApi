@@ -1,12 +1,55 @@
 const Post = require('../models/post');
 const Comment = require('../models/comment');
+const User = require('../models/user');
 const {body,param,validationResult} = require('express-validator')
 const Routing = require('../middleware/routing')
+const jsonwebtoken = require('jsonwebtoken');
+const bcrypt = require('bcryptjs');
+const jwt = require('express-jwt');
 
 exports.getHome = function(req,res,next){
     res.json({key:'test'});
 }
+exports.login = [
+    body('username').notEmpty().withMessage('Username cannot be empty')
+        .trim()
+        .escape(),
+    body('password').notEmpty().withMessage('Password cannot be empty')
+        .trim()
+        .escape(),
+    function(req,res,next){
+        let errors = validationResult(req);
 
+        if(!errors.isEmpty()){
+            res.json(errors)
+        }
+        else{
+            User.findOne({username:req.body.username})
+                .then(user=>{
+                    if(!user){
+                        res.json({errors:'User not found'})
+                    }
+                    else{
+                        bcrypt.compare(req.body.password,user.password,(err,response)=>{
+                            if(err){
+                                res.json(err)
+                            }
+                            else if(response){
+                                //Secret should be env, test time
+                                let token = jsonwebtoken.sign({user}, 'testsecret')
+                                res.cookie('token', token, {httpOnly:true, maxAge:100000});
+                                res.json({token})
+                            }
+                            else{
+                               res.json({errors:'Wrong password'}) 
+                            }
+                        })
+                    }
+                })
+        }
+        
+    }
+]
 exports.getPosts = function(req,res,next){  
     Post.find({})
         .then(posts=>{
@@ -18,6 +61,12 @@ exports.getPosts = function(req,res,next){
 }
 
 exports.createPost = [
+    // Test middleware
+    jwt({
+        secret:'testsecret',
+        algorithms: ['HS256'],
+        getToken: req => req.cookies.token
+    }),
     body('title').notEmpty().withMessage('Title Cannot be Empty')
         .trim()
         .escape(),

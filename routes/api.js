@@ -7,6 +7,7 @@ const Comment = require('../models/comment');
 const {body,param,validationResult} = require('express-validator')
 
 router.get('/', apiController.getHome);
+router.post('/login', apiController.login)
 
 router.get('/post', apiController.getPosts);
 router.post('/post', apiController.createPost);
