@@ -2,7 +2,6 @@ const Post = require('../models/post');
 const Comment = require('../models/comment');
 const User = require('../models/user');
 const {body,param,validationResult} = require('express-validator')
-const Routing = require('../middleware/routing')
 const jsonwebtoken = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const jwt = require('express-jwt');
@@ -10,6 +9,19 @@ const jwt = require('express-jwt');
 exports.getHome = function(req,res,next){
     res.json({key:'test'});
 }
+
+exports.validId = function(req,res,next){
+    if(!(req.params.id.match(/^[0-9a-fA-F]{24}$/))){
+       res.status(404).json({errors: 'INVALID OBJECT ID'})
+    }
+    else if(req.params.commentId && !(req.params.commentId.match(/^[0-9a-fA-F]{24}$/))){
+        res.status(404).json({errors: 'INVALID OBJECT ID'})
+    }
+    else{
+        next();
+    }
+}
+
 exports.login = [
     body('username').notEmpty().withMessage('Username cannot be empty')
         .trim()
@@ -102,8 +114,6 @@ exports.getSinglePost = [
         .trim()
         .escape(),
 
-    Routing.validId,
-    
     function(req,res,next){
         let errors = validationResult(req);
 
@@ -128,11 +138,16 @@ exports.getSinglePost = [
 ]
 
 exports.deletePost = [
+
+    jwt({
+        secret:'testsecret',
+        algorithms: ['HS256'],
+        getToken: req => req.cookies.token
+    }),
+    
     param('id').isLength({min:24,max:24}).withMessage('Invalid ID')
         .trim()
         .escape(),
-
-    Routing.validId,
     
     function(req,res,next){
         let errors = validationResult(req);
@@ -164,9 +179,8 @@ exports.deletePost = [
 exports.getComments = [
     param('id').isLength({min:24,max:24}).withMessage('Invalid ID')
         .trim()
-        .escape(),
-    Routing.validId,
-    
+        .escape()
+    ,
     function(req,res,next){
         let errors = validationResult(req);
 
@@ -185,6 +199,39 @@ exports.getComments = [
     }
 ]
 
+exports.getComment = [
+    param('id').isLength({min:24,max:24}).withMessage('Invalid ID')
+    .trim()
+    .escape(),
+
+    param('commentId').isLength({min:24,max:24}).withMessage('Invalid ID')
+    .trim()
+    .escape(),
+
+    function(req,res,next){
+        let errors = validationResult(req);
+
+        if(!errors.isEmpty()){
+            res.json(errors);
+        }
+        else{
+            Comment.findById(req.params.commentId)
+                .then(comment=>{
+                    if(!comment){
+                        res.json({errors:'COMMENT DOES NOT EXIST'});
+                    }
+                    else{
+                        res.json(comment)
+                    }
+                })
+                .catch(err=>{
+                    res.json(err);
+                })
+                
+        }
+    }
+]
+
 exports.postComment = [
     body('name').notEmpty().withMessage('Name cannot be empty')
         .trim()
@@ -195,7 +242,6 @@ exports.postComment = [
     param('id').isLength({min:24,max:24}).withMessage('Invalid ID')
         .trim()
         .escape(),
-    Routing.validId,
     
     function(req,res,next){
         let errors = validationResult(req);
@@ -232,14 +278,20 @@ exports.postComment = [
 ]
 
 exports.deleteComment = [
+    jwt({
+        secret:'testsecret',
+        algorithms: ['HS256'],
+        getToken: req => req.cookies.token
+    }),
+
     param('id').isLength({min:24,max:24}).withMessage('Invalid ID')
         .trim()
         .escape(),
-    Routing.validId,
     
     param('commentId').isLength({min:24,max:24}).withMessage('Invalid Comment ID')
         .trim()
         .escape(),
+
     function(req,res,next){
         let errors = validationResult(req);
 

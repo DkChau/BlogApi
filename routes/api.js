@@ -12,14 +12,15 @@ router.post('/login', apiController.login)
 router.get('/post', apiController.getPosts);
 router.post('/post', apiController.createPost);
 
-router.get('/post/:id', apiController.getSinglePost);
-router.delete('/post/:id', apiController.deletePost);
+router.get('/post/:id', apiController.validId, apiController.getSinglePost);
+router.delete('/post/:id', apiController.validId, apiController.deletePost);
 
 //Comment Section
 //Only requires authentication on delete route
-router.get('/post/:id/comment', apiController.getComments);
-router.post('/post/:id/comment', apiController.postComment);
-router.delete('/post/:id/comment/:commentId', apiController.deleteComment);
+router.get('/post/:id/comment', apiController.validId, apiController.getComments);
+router.post('/post/:id/comment', apiController.validId, apiController.postComment);
+router.get('/post/:id/comment/:commentId', apiController.validId, apiController.getComment);
+router.delete('/post/:id/comment/:commentId', apiController.validId, apiController.deleteComment);
 
 //MISSING UPDATES FOR POST AND LOGIN ROUTE
 
