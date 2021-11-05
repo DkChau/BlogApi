@@ -8,9 +8,23 @@ const jwt = require('express-jwt');
 
 require('dotenv').config();
 
-exports.getHome = function(req,res,next){
-    res.json({key:'test'});
-}
+exports.getHome = [
+    jwt({
+        secret:process.env.TOKEN_SECRET,
+        algorithms: ['HS256'],
+        getToken: req => req.cookies.token,
+        credentialsRequired:false
+    }),
+    function(req,res,next){
+        console.log(req.cookies.token)
+        if(req.user){
+            res.json({authorized:true})
+        }
+        else{
+            res.json({authorized:false})
+        }
+    },
+]
 
 exports.validId = [
     param('id').isLength({min:24,max:24}).withMessage('Invalid ID')
@@ -73,7 +87,6 @@ exports.login = [
                                 res.setHeader('set-cookie', [
                                     `token=${token}; SameSite=None; Secure; HttpOnly=true; Max-Age=86400`
                                 ])
-                                // res.cookie('token', token, {httpOnly:true, maxAge:3600000, SameSite:'none', secure:true});
                                 res.json({token})
                             }
                             else{
