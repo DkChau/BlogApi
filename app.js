@@ -5,6 +5,8 @@ var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 const mongoose = require('mongoose')
 const cors = require('cors')
+const helmet = require('helmet');
+const compression = require('compression');
 
 var indexRouter = require('./routes/index');
 var apiRouter = require('./routes/api.js');
@@ -27,6 +29,8 @@ app.use(cors({
   credentials: true,
   origin:true,
 }));
+app.use(helmet())
+app.use(compression())
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
