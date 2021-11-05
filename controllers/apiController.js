@@ -70,7 +70,7 @@ exports.login = [
                             }
                             else if(response){
                                 let token = jsonwebtoken.sign({user}, process.env.TOKEN_SECRET)
-                                res.cookie('token', token, {httpOnly:true, maxAge:3600000});
+                                res.cookie('token', token, {httpOnly:true, maxAge:3600000, SameSite:'none', secure:true});
                                 res.json({token})
                             }
                             else{
