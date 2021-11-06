@@ -11,6 +11,8 @@ let postSchema = new Schema({
     date:{type:Date, default:Date.now()},
 })
 
+postSchema.set('toJSON', { virtuals: true })
+
 postSchema
 .virtual('date_formatted')
 .get(function () {

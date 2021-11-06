@@ -10,6 +10,8 @@ let commentSchema = new Schema({
     date:{type:Date, default:Date.now()}
 })
 
+commentSchema.set('toJSON', { virtuals: true })
+
 commentSchema
 .virtual('date_formatted')
 .get(function () {
