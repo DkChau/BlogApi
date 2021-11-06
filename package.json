@@ -1,8 +1,8 @@
 {
   "name": "blogapi",
   "version": "0.0.0",
-  "engines":{
-    "node":"14.17.1"
+  "engines": {
+    "node": "14.17.1"
   },
   "private": true,
   "scripts": {
@@ -24,6 +24,7 @@
     "http-errors": "~1.6.3",
     "jade": "^0.29.0",
     "jsonwebtoken": "^8.5.1",
+    "luxon": "^2.0.2",
     "mongoose": "^6.0.12",
     "morgan": "~1.9.1",
     "nodemon": "^2.0.14",
