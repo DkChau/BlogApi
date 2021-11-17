@@ -110,10 +110,10 @@ exports.getPosts = [
         let allPost;
 
         if(req.user){
-            allPost=Post.find({}).exec()
+            allPost=Post.find({}).sort({date: 'desc'}).exec()
         }
         else{
-            allPost=Post.find({published:true}).exec()
+            allPost=Post.find({published:true}).sort({date: 'desc'}).exec()
         }
 
         allPost
@@ -298,7 +298,7 @@ exports.getComments = [
                     res.status(404).json({errors:'Post does not exist'})
                 }
                 else{
-                    Comment.find({post:req.params.id})
+                    Comment.find({post:req.params.id}).sort({date: 'asc'}).exec()
                     .then(comments =>{
                         res.json(comments);
                     })
